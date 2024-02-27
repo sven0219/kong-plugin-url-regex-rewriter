@@ -1,21 +1,9 @@
--- load the base plugin object
-local BasePlugin = require "kong.plugins.base_plugin"
+local urlRegexRewriterHandler = {
+  PRIORITY = 777,
+  VERSION  = "0.2.0",
+}
 
--- creating handler
-local plugin = BasePlugin:extend()
-
-plugin.PRIORITY = 777
-plugin.VERSION  = "0.1.0"
-
--- constructor
-function plugin:new()
-  plugin.super.new(self, "url-regex-rewriter")
-end
-
--- Main Logic
-function plugin:access(conf) -- Executed for every request upon it's reception from a client and before it is being proxied to the upstream service.
-  plugin.super.access(self)
-
+function urlRegexRewriterHandler:access(conf)
   local newstr, n, err = ngx.re.sub(ngx.escape_uri(ngx.var.uri, 0), conf.regex, conf.replace)
   if n > 0 then
       ngx.var.upstream_uri = newstr
@@ -23,4 +11,4 @@ function plugin:access(conf) -- Executed for every request upon it's reception f
   end
 end
 
-return plugin
+return urlRegexRewriterHandler
